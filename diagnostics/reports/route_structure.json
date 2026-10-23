@@ -1,0 +1,20 @@
+{
+ "marker_rows": 1455,
+ "marker_row_acc": 0.8611683848797251,
+ "unambiguous_label_deviation_rate": 0.05230669265756985,
+ "markers": [
+  "The main thing I need resolved is:",
+  "Some context first:",
+  "Also worth mentioning,",
+  "Most importantly:",
+  "Priority for me is:",
+  "My real question is this:",
+  "For background,",
+  "Separately, and this is less urgent,",
+  "What I actually need help with is this:",
+  "The part I need you to action is:",
+  "Less important, but while I am writing:",
+  "On a related note,",
+  "Delivery of my last order was on time,"
+ ]
+}

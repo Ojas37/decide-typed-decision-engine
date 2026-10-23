@@ -1,0 +1,89 @@
+﻿
+=== 1. METHOD CHECK + SEED NOISE (deployed recipe; latency assumed full => +20)
+seed 13                                        total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816
+seed 14                                        total 81.59 | Q 0.819 C 0.839 A 0.523 | qual[r/a/g] 0.923/0.548/0.988 | 
+abst[r/a/g] 0.349/0.383/0.835
+seed 15                                        total 81.39 | Q 0.816 C 0.842 A 0.512 | qual[r/a/g] 0.922/0.540/0.987 | 
+abst[r/a/g] 0.330/0.386/0.821
+OOF total over seeds: mean 81.62  std 0.24  range [81.39, 81.87]   <- public-dev result you reported: 82.07
+
+=== 2. WHERE THE POINTS ARE (seed 13).  weight x axis = points; headroom = (1-axis) x weight
+  quality     axis 0.822  x 40 = 32.89 pts   headroom 7.11 pts
+  calibration axis 0.844  x 25 = 21.10 pts   headroom 3.90 pts
+  latency     axis 1.000  x 20 = 20.00 pts   headroom 0.00 pts
+  abstention  axis 0.526  x 15 =  7.88 pts   headroom 7.12 pts
+  quality parts  route 0.925  approve 0.553  grounded 0.990  -> headroom pts: 1.00 / 5.97 / 0.14 (each worth 40/3)
+  calibration: mean ECE parts [0.037 0.009 0.007]  Brier skills [0.794 0.644 0.89 ]
+  abstention parts route/approve/grounded: [0.367 0.394 0.816]  (each worth 5 pts x part)
+
+=== 3. WHAT-IFS on the SAME OOF methodology (not dev claims)
+deployed recipe (cov .83, T / iso / platt)     total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816
+coverage target 0.75 (all three)               total 80.04 | Q 0.777 C 0.844 A 0.526 | qual[r/a/g] 0.867/0.533/0.929 | 
+abst[r/a/g] 0.367/0.394/0.816  (-1.83 vs base)
+coverage target 0.78 (all three)               total 81.39 | Q 0.810 C 0.844 A 0.526 | qual[r/a/g] 0.902/0.562/0.966 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.49 vs base)
+coverage target 0.80 (all three)               total 81.88 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.926/0.551/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.01 vs base)
+coverage target 0.85 (all three)               total 81.65 | Q 0.817 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.537/0.988 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.23 vs base)
+coverage target 0.90 (all three)               total 81.09 | Q 0.803 C 0.844 A 0.526 | qual[r/a/g] 0.921/0.509/0.979 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.78 vs base)
+coverage target 1.00 (all three)               total 79.80 | Q 0.770 C 0.844 A 0.526 | qual[r/a/g] 0.888/0.477/0.946 | 
+abst[r/a/g] 0.367/0.394/0.816  (-2.07 vs base)
+route calibrator = raw                         total 81.96 | Q 0.823 C 0.846 A 0.526 | qual[r/a/g] 0.926/0.553/0.990 | 
+abst[r/a/g] 0.369/0.394/0.816  (+0.08 vs base)
+route calibrator = ovr_platt                   total 81.89 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.368/0.394/0.816  (+0.01 vs base)
+route calibrator = ovr_isotonic                total 82.44 | Q 0.823 C 0.866 A 0.526 | qual[r/a/g] 0.926/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.57 vs base)
+approve calibrator = raw                       total 81.24 | Q 0.825 C 0.810 A 0.534 | qual[r/a/g] 0.925/0.560/0.990 | 
+abst[r/a/g] 0.367/0.418/0.816  (-0.63 vs base)
+approve calibrator = temperature               total 81.49 | Q 0.824 C 0.822 A 0.533 | qual[r/a/g] 0.925/0.558/0.990 | 
+abst[r/a/g] 0.367/0.415/0.816  (-0.38 vs base)
+approve calibrator = platt                     total 81.58 | Q 0.825 C 0.826 A 0.529 | qual[r/a/g] 0.925/0.561/0.990 | 
+abst[r/a/g] 0.367/0.403/0.816  (-0.30 vs base)
+grounded calibrator = raw                      total 81.60 | Q 0.822 C 0.834 A 0.525 | qual[r/a/g] 0.925/0.553/0.988 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.27 vs base)
+grounded calibrator = temperature              total 81.76 | Q 0.822 C 0.840 A 0.525 | qual[r/a/g] 0.925/0.553/0.988 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.11 vs base)
+grounded calibrator = isotonic                 total 81.82 | Q 0.822 C 0.844 A 0.523 | qual[r/a/g] 0.925/0.553/0.989 | 
+abst[r/a/g] 0.367/0.394/0.808  (-0.05 vs base)
+approve abstain rule = max_risk                total 81.77 | Q 0.820 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.545/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.10 vs base)
+approve abstain rule = band_below_thr          total 80.86 | Q 0.797 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.477/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (-1.01 vs base)
+approve decision threshold = 0.50              total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.00 vs base)
+approve decision threshold = 0.60              total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.00 vs base)
+approve decision threshold = 0.70              total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.00 vs base)
+approve decision threshold = 0.73              total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.00 vs base)
+approve decision threshold = 0.75              total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.00 vs base)
+approve decision threshold = 0.78              total 81.87 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.00 vs base)
+approve decision threshold = 0.80              total 81.60 | Q 0.816 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.532/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.27 vs base)
+coverage route .80 / approve .83 / grounded .83 total 81.89 | Q 0.823 C 0.844 A 0.526 | qual[r/a/g] 0.926/0.553/0.990 
+| abst[r/a/g] 0.367/0.394/0.816  (+0.02 vs base)
+route .83 / approve .80 / grounded .83         total 81.85 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.551/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (-0.02 vs base)
+route .83 / approve .83 / grounded .80         total 81.88 | Q 0.823 C 0.844 A 0.526 | qual[r/a/g] 0.925/0.553/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.01 vs base)
+coverage .80 on all three                      total 81.88 | Q 0.822 C 0.844 A 0.526 | qual[r/a/g] 0.926/0.551/0.990 | 
+abst[r/a/g] 0.367/0.394/0.816  (+0.01 vs base)
+
+=== 4. UPPER-BOUND SIMULATIONS (oracle edits to OOF predictions; NOT achievable promises)
+   marker-row route errors flipped to correct (167 of 614 total errors)
+ORACLE: fix all marker-row route errors        total 81.11 | Q 0.826 C 0.833 A 0.483 | qual[r/a/g] 0.935/0.553/0.990 | 
+abst[r/a/g] 0.239/0.394/0.816  (-0.77 vs base)
+ORACLE: halve grounded errors                  total 82.18 | Q 0.824 C 0.849 A 0.532 | qual[r/a/g] 0.925/0.553/0.995 | 
+abst[r/a/g] 0.367/0.394/0.836  (+0.31 vs base)
+ORACLE: remove ALL grounded errors             total 83.46 | Q 0.826 C 0.865 A 0.587 | qual[r/a/g] 0.925/0.553/1.000 | 
+abst[r/a/g] 0.367/0.394/1.000  (+1.59 vs base)
+
+

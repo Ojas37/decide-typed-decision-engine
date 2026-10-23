@@ -1,0 +1,60 @@
+﻿
+candidate marker phrases (multi-issue bodies):
+    91  My real question is this:
+    90  Priority for me is:
+    88  Less important, but while I am writing:
+    87  Some context first:
+    87  For background,
+    86  Most importantly:
+    82  Separately, and this is less urgent,
+    76  The main thing I need resolved is:
+    76  The part I need you to action is:
+    75  What I actually need help with is this:
+    70  On a related note,
+    69  Also worth mentioning,
+    19  Delivery of my last order was on time,
+    12  I have already tried logging out and back in,
+    10  Please confirm full erasure of my personal data under GDPR,
+     9  Thanks,
+
+rows containing >=1 marker: 1455 (22.4%)  accuracy 0.861 | rows without: 0.918
+marker rows hold 32.9% of all route errors; by subject type: multi-subject 38% of marker rows
+marker rows under NON-multi subjects: 898  acc 0.894
+
+vague single-issue subjects, no marker: 334 rows, acc 0.647, errors 118 (19.2% of all errors)
+  [Not working] true=billing pred=general conf=0.47 | Good morning, Can someone help with my account please. Let me 
+know. -- sent via mobile
+  [Help needed] true=technical pred=account conf=0.83 | Hi, I need assistance with Atlas. Not sure where to start. 
+Please advise. The amount in question is $84.66.
+  [please help] true=general pred=billing conf=0.62 | Hi team, I am having a problem and would like someone to call me 
+back. Please advise. My colleague on the Pro plan sees the same thing. The amount in question is $87.42.
+  [Problem] true=account pred=technical conf=0.70 | Hi there, Something is not right and I am not sure who I should be 
+asking. Can someone take a look? Thanks. -- sent via mobile I'm on the Free plan.
+  [Help needed] true=billing pred=account conf=0.93 | Hello, This has been going on since Friday and I would like it 
+resolved. I'd appreciate a quick response. Thanks in advance. Sofia The amount in question is $759.08. I'm 
+  [Not working] true=technical pred=account conf=0.51 | Hi, Can someone help with my account please. Thanks in 
+advance. I'm on the Free plan.
+  OK [urgent] true=billing pred=billing conf=0.87 | Hi team, This has been going on since Tuesday and I would like it 
+resolved. I've been waiting a while now. Appreciate the help. Please reply to this address. I have admin
+  OK [Not working] true=shipping pred=shipping conf=0.59 | Can someone help with my account please. Thanks in advance. 
+The amount in question is $13.57.
+  OK [Not working] true=shipping pred=shipping conf=0.89 | Hi there, This has been going on since this morning and I 
+would like it resolved. Not impressed honestly. Appreciate the help.
+
+UNAMBIGUOUS subjects (dominant route>=85%, n>=20, no marker): 3078 rows
+  label differs from the subject's dominant route in 5.2% of them (apparent label noise / rule we cannot see)
+  model errors there: 163, of which 161 (99%) are rows labelled against the dominant route
+  minority-labelled rows: tier mix {'free': 74, 'enterprise': 34, 'pro': 53} | amount==0 0.24 (base 0.20)
+  does the BODY text of a minority-labelled row differ from its subject's usual body? sample:
+   [Shipment stuck in transit] label=general dominant=shipping model=shipping conf=0.86 | DHL shows the same status 
+for four days now. Is it lost? Regards. I did check the documentation for bulk upload before writing in.
+   [Need a copy of my invoice] label=shipping dominant=billing model=billing conf=0.97 | I need a proper tax invoice 
+with our company details on it for teh April payment Please advise I raised TKT-4391 about something e
+   [update shipping address] label=billing dominant=shipping model=shipping conf=0.97 | I entered the old address on 
+#10228. Can it be redirected before dispatch? Appreciate the help. The amount in question is $48.09. 
+   [reset mail not coming] label=technical dominant=account model=account conf=0.95 | Good morning, Could you trigger 
+a password reset for me manually? Appreciate the help. I have already tried logging out and back i
+   [received it smashed] label=billing dominant=shipping model=shipping conf=0.99 | Order #10185 arrived with the box 
+crushed and the contents cracked. Photos attached. Thanks in advance. The amount in question is 
+
+

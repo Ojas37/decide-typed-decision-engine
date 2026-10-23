@@ -1,0 +1,4 @@
+# Only needed to run train.py (e.g. on Colab). Serving needs requirements.txt only.
+-r requirements.txt
+torch>=2.1,<3.0
+scikit-learn>=1.3,<2.0

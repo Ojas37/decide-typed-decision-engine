@@ -1,0 +1,57 @@
+﻿
+== 1. AMOUNT CUTOFFS. approve rate among model-eligible-TYPE rows is confounded by type, so show raw rate and rate 
+among rows with p_text high
+   Using rows the model scores >=0.7 OR whose only reason for low p is amount: approximated by logit rank within tier
+ tier=free
+   15:0.75(n80)  17.5:0.61(n69)  20:0.49(n75)  22.5:0.56(n61)  25:0.24(n82)  27.5:0.29(n59)  30:0.09(n22)  
+32.5:0.00(n17)  35:0.00(n25)  37.5:0.00(n15)  40:0.00(n23)  42.5:0.00(n25)  45:0.00(n23)  47.5:0.00(n24)
+ tier=pro
+   80:0.61(n33)  85:0.56(n34)  90:0.58(n33)  95:0.56(n25)  100:0.31(n36)  105:0.28(n39)  110:0.30(n33)  115:0.34(n41)  
+120:0.12(n8)  125:0.00(n11)  130:0.00(n9)  135:0.00(n5)  140:0.00(n10)  145:0.00(n14)
+ tier=enterprise
+   
+ tier free       approved amounts: p50 8.7  p90 22.8  p99 29.0  max 31.10   | held amounts below max-approved: 574 of 
+2226
+      approvals sorted tail: [29.03 29.07 29.2  29.34 29.4  29.99 30.41 31.1 ]
+ tier pro        approved amounts: p50 22.5  p90 83.6  p99 116.7  max 121.29   | held amounts below max-approved: 619 
+of 1418
+      approvals sorted tail: [118.58 118.99 119.07 119.21 119.49 119.67 119.97 121.29]
+ tier enterprise approved amounts: p50 51.6  p90 297.0  p99 387.2  max 499.45   | held amounts below max-approved: 291 
+of 403
+      approvals sorted tail: [387.13 387.49 394.09 398.86 399.93 463.47 480.56 499.45]
+
+== 2. IS THE HELD-BACK 18% INSIDE THE ELIGIBLE SET PREDICTABLE?  (eligible = oof p>=0.7, n=2683, hold rate 0.182)
+  LR (text+tier+amount bins) C=0.03  5-fold AUROC for 'held back' inside eligible set: 0.476
+  LR (text+tier+amount bins) C=0.10  5-fold AUROC for 'held back' inside eligible set: 0.481
+  LR (text+tier+amount bins) C=0.30  5-fold AUROC for 'held back' inside eligible set: 0.485
+  AUROC of the deployed model's own p inside the eligible set: 0.540
+  features most associated with HOLD inside eligible set:
+  features most associated with APPROVE inside eligible set:
+     -1.01  amt_bin=4
+     -0.57  amt_bin=3
+     -0.54  amt_bin=5
+     -0.52  amt_bin=1
+     -0.50  amt_bin=0
+     -0.48  sf:need help
+     -0.46  s:about
+     -0.46  bs:sent from my phone
+     -0.45  amt_bin=36
+     -0.44  b:seven
+
+== 3. relation to other labels inside the eligible set
+  hold rate by route label: {'billing': 0.185, 'technical': 0.163, 'account': 0.185, 'shipping': 0.208, 'general': 
+0.177}
+  hold rate by grounded label: {'True': 0.189, 'False': 0.173}
+  hold rate by tier: {'free': 0.2, 'pro': 0.18, 'enterprise': 0.167}
+  hold rate by amount bin: {'0-0.001': (0.172, 628), '0.001-10': (0.163, 282), '10-25': (0.188, 765), '25-50': (0.124, 
+347), '50-100': (0.213, 381), '100-200': (0.275, 131), '200-500': (0.208, 149)}
+  hold rate by fold id (is it stable?): {0: 0.198, 1: 0.188, 2: 0.164, 3: 0.173, 4: 0.19}
+
+== 4. same question on the HOLD side: approvals inside p<0.1 (n=3233): 25
+
+== 5. approve vs 'noise-like' flips: hold rate among rows far below every cutoff (amount 1-10): 0.241 ; rows in same 
+cells but amount>=500: approve rate 0.000
+   approvals with amount >= 500: 0 / 715 ; free approvals with amount>=60: 0 / 1416 ; pro approvals with amount>=150: 
+0 / 744
+
+

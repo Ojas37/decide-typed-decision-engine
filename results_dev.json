@@ -1,0 +1,88 @@
+{
+  "url": "http://127.0.0.1:8000/v1/decide",
+  "eval": "data/dev.jsonl",
+  "n_records": 1500,
+  "n_calls": 4500,
+  "gates": {
+    "schema_clean": true,
+    "latency_under_gate": true,
+    "reachable": true
+  },
+  "schema": {
+    "valid": 4500,
+    "total": 4500,
+    "violations": {},
+    "transport_errors": {}
+  },
+  "latency_ms": {
+    "p50": {
+      "route": 1.0400500032119453,
+      "approve": 1.0247500031255186,
+      "grounded": 1.0129000002052635
+    },
+    "p95": {
+      "route": 1.634319988079369,
+      "approve": 1.605385000584647,
+      "grounded": 1.6258149815257639
+    },
+    "mean_p95": 1.62183999006326,
+    "overall_p50": 1.02530000731349,
+    "overall_p95": 1.6238200216321275,
+    "server_self_reported_p95": 0.545,
+    "reconnects": 0
+  },
+  "quality": {
+    "route_macro_f1": 0.9383332029978535,
+    "route_acc": 0.9106666666666666,
+    "coverage": {
+      "route": 0.8366666666666667,
+      "approve": 0.8426666666666667,
+      "grounded": 0.874
+    },
+    "approve_cost": 0.2143987341772152,
+    "approve_macro_f1": 0.9239271188250482,
+    "grounded_macro_f1": 0.9935582143822322,
+    "fp_cost": 3.0,
+    "trivial": {
+      "route_macro_f1": 0.08467336683417084,
+      "approve_cost_always_hold": 0.37579113924050633,
+      "approve_cost_always_approve": 1.872626582278481,
+      "grounded_macro_f1": 0.3795551348793185
+    }
+  },
+  "calibration": {
+    "route_ece": 0.03950573632689789,
+    "approve_ece": 0.01287388396094477,
+    "grounded_ece": 0.010470453215271692,
+    "approve_brier": 0.08461208134634327,
+    "grounded_brier": 0.019393858213738978,
+    "mean_ece": 0.020950024501038115,
+    "mean_brier": 0.052002969780041125,
+    "brier_skill": 0.7905206536977573,
+    "route_brier": 0.15539380895694713
+  },
+  "abstention": {
+    "risk_at_80": {
+      "route": 0.057499999999999996,
+      "approve": 0.06916666666666671,
+      "grounded": 0.004166666666666652
+    },
+    "full_error": {
+      "route": 0.08933333333333338,
+      "approve": 0.11266666666666669,
+      "grounded": 0.021333333333333315
+    },
+    "declared_coverage": {
+      "route": 0.8366666666666667,
+      "approve": 0.8426666666666667,
+      "grounded": 0.874
+    }
+  },
+  "score_parts": {
+    "quality": 0.831450459826124,
+    "calibration": 0.8428852655962833,
+    "latency": 1.0,
+    "abstention": 0.5157084860461011
+  },
+  "score": 82.06577732364356
+}

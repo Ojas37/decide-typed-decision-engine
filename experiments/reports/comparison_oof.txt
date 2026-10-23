@@ -1,0 +1,65 @@
+======================================================================================================================
+OUT-OF-FOLD (train only) - seeds (13, 14, 15) - latency assumed full (+20 pts); measured latency reported separately
+======================================================================================================================
+cand      seed     TOTAL |  quality calibration abstention | quality route/approve/grounded | valid-route-probs
+baseline  13       81.87 |   0.8223      0.8438     0.5256 | 0.9249 / 0.5526 / 0.9895              | True
+baseline  14       81.59 |   0.8195      0.8390     0.5226 | 0.9226 / 0.5482 / 0.9876              | True
+baseline  15       81.51 |   0.8194      0.8418     0.5124 | 0.9220 / 0.5492 / 0.9871              | True
+baseline  mean     81.66 |   0.8204      0.8415     0.5202 | 0.9232 / 0.5500 / 0.9881
+----------------------------------------------------------------------------------------------------------------------
+A         13       81.19 |   0.8126      0.8416     0.5098 | 0.9260 / 0.5301 / 0.9817              | True
+A         14       81.53 |   0.8136      0.8413     0.5303 | 0.9199 / 0.5379 / 0.9829              | True
+A         15       81.26 |   0.8146      0.8371     0.5166 | 0.9193 / 0.5394 / 0.9851              | True
+A         mean     81.33 |   0.8136      0.8400     0.5189 | 0.9217 / 0.5358 / 0.9832
+----------------------------------------------------------------------------------------------------------------------
+B         13       82.44 |   0.8228      0.8658     0.5256 | 0.9265 / 0.5526 / 0.9895              | True
+B         14       82.27 |   0.8194      0.8644     0.5257 | 0.9222 / 0.5482 / 0.9876              | True
+B         15       82.01 |   0.8187      0.8640     0.5108 | 0.9200 / 0.5492 / 0.9871              | True
+B         mean     82.24 |   0.8203      0.8647     0.5207 | 0.9229 / 0.5500 / 0.9881
+----------------------------------------------------------------------------------------------------------------------
+AB        13       81.73 |   0.8126      0.8655     0.5060 | 0.9259 / 0.5301 / 0.9817              | True
+AB        14       82.01 |   0.8133      0.8606     0.5310 | 0.9190 / 0.5379 / 0.9829              | True
+AB        15       81.93 |   0.8138      0.8624     0.5211 | 0.9168 / 0.5394 / 0.9851              | True
+AB        mean     81.89 |   0.8132      0.8628     0.5194 | 0.9205 / 0.5358 / 0.9832
+----------------------------------------------------------------------------------------------------------------------
+
+PAIRED DIFFERENCES vs baseline (same folds, same seeds)  | accept iff all seeds > 0 AND mean > 0.3
+  A   deltas ['-0.68', '-0.06', '-0.25']   mean -0.33   min -0.68   -> REJECT
+        quality      ['-0.0097', '-0.0059', '-0.0048']  mean -0.0068  (points: -0.27)
+        calibration  ['-0.0022', '+0.0023', '-0.0046']  mean -0.0015  (points: -0.04)
+        abstention   ['-0.0158', '+0.0077', '+0.0042']  mean -0.0013  (points: -0.02)
+  B   deltas ['+0.57', '+0.68', '+0.50']   mean +0.58   min +0.50   -> ACCEPT (OOF)
+        quality      ['+0.0005', '-0.0001', '-0.0007']  mean -0.0001  (points: -0.00)
+        calibration  ['+0.0220', '+0.0254', '+0.0222']  mean +0.0232  (points: +0.58)
+        abstention   ['+0.0000', '+0.0032', '-0.0016']  mean +0.0005  (points: +0.01)
+  AB  deltas ['-0.14', '+0.42', '+0.42']   mean +0.23   min -0.14   -> REJECT
+        quality      ['-0.0098', '-0.0062', '-0.0057']  mean -0.0072  (points: -0.29)
+        calibration  ['+0.0216', '+0.0217', '+0.0206']  mean +0.0213  (points: +0.53)
+        abstention   ['-0.0196', '+0.0084', '+0.0087']  mean -0.0008  (points: -0.01)
+  AB vs A: deltas ['+0.54', '+0.48', '+0.66'] mean +0.56
+  AB vs B: deltas ['-0.71', '-0.26', '-0.09'] mean -0.35
+
+PER-DECISION DETAIL (mean over 3 seeds)   order: route / approve / grounded
+cand      | quality                    | ECE                        | Brier skill (ref=prior)    | risk@80 (full err)   | abstention part       
+baseline  | 0.9232 /0.5500 /0.9881     | 0.0387 /0.0092 /0.0070     | 0.7935 /0.6449 /0.8854     | 0.0608/0.0663/0.0062 | 0.349 /0.387 /0.824   
+A         | 0.9217 /0.5358 /0.9832     | 0.0385 /0.0075 /0.0053     | 0.7916 /0.6415 /0.8632     | 0.0597/0.0660/0.0088 | 0.358 /0.406 /0.792   
+B         | 0.9229 /0.5500 /0.9881     | 0.0116 /0.0092 /0.0070     | 0.7971 /0.6449 /0.8854     | 0.0613/0.0663/0.0062 | 0.350 /0.387 /0.824   
+AB        | 0.9205 /0.5358 /0.9832     | 0.0119 /0.0075 /0.0053     | 0.7957 /0.6415 /0.8632     | 0.0606/0.0660/0.0088 | 0.360 /0.406 /0.792   
+
+ROUTE-SPECIFIC (mean over seeds): ECE / multiclass Brier / Brier skill / risk@80 / full error / accuracy / macro-F1(answered)
+  baseline  ECE 0.0387  Brier 0.1619  skill 0.7935  risk@80 0.0608  full-err 0.0934  acc 0.9066  F1 0.9301  distinct confidence values 6500
+  A         ECE 0.0385  Brier 0.1634  skill 0.7916  risk@80 0.0597  full-err 0.0931  acc 0.9069  F1 0.9289  distinct confidence values 6499
+  B         ECE 0.0116  Brier 0.1591  skill 0.7971  risk@80 0.0613  full-err 0.0944  acc 0.9056  F1 0.9299  distinct confidence values 2803
+  AB        ECE 0.0119  Brier 0.1602  skill 0.7957  risk@80 0.0606  full-err 0.0947  acc 0.9053  F1 0.9278  distinct confidence values 2551
+
+APPROVE-SPECIFIC (mean): cost on answered rows / ECE / Brier / full-coverage error / decision threshold
+  baseline  cost 0.1924  ECE 0.0092  Brier 0.0834  err 0.1083  thr [0.73, 0.8, 0.75]
+  A         cost 0.1988  ECE 0.0075  Brier 0.0842  err 0.1111  thr [0.77, 0.71, 0.75]
+  B         cost 0.1924  ECE 0.0092  Brier 0.0834  err 0.1083  thr [0.73, 0.8, 0.75]
+  AB        cost 0.1988  ECE 0.0075  Brier 0.0842  err 0.1111  thr [0.77, 0.71, 0.75]
+
+COVERAGE (declared, mean): route / approve / grounded
+  baseline  0.830 / 0.832 / 0.830   (min across seeds & decisions 0.830; grader target 0.80)
+  A         0.830 / 0.833 / 0.830   (min across seeds & decisions 0.830; grader target 0.80)
+  B         0.830 / 0.832 / 0.830   (min across seeds & decisions 0.830; grader target 0.80)
+  AB        0.830 / 0.833 / 0.830   (min across seeds & decisions 0.830; grader target 0.80)

@@ -1,0 +1,56 @@
+﻿
+multi-issue-subject rows: 557  acc 0.808
+
+[Help with 2 things] true=technical pred=billing conf=0.37
+  the part i need you to action is: edits i make on the chrome extension aren't showing up anywhere else. some context 
+first: i was billed on the 19th and then again on the 14th for the same free plan.
+
+[A couple of issues] true=technical pred=technical conf=0.75
+  Less important, but while I am writing: The guide for teh dashboard skips a step between authentication and the 
+first call. The main thing I need resolved is: The client crashes about three seconds after launch, no error message, 
+just disappears.
+
+[several issues] true=technical pred=technical conf=0.92
+  Less important, but while I am writing: Cancel the account and reverse the most recent payment please. The part I 
+need you to action is: Every time I open scheduled reports the whole thing crashes.
+
+[Few things to sort out] true=general pred=general conf=0.88
+  The part I need you to action is: Just wanted to say the last weekend release fixed a long-standing annoyance for us 
+Separately, and this is less urgent, order #10120 arrived with the box crushed and the contents cracked I have already 
+tried logging out and back in, and clearing the cache.
+
+[Help with 2 things] true=billing pred=billing conf=0.56
+  Less important, but while I am writing: Is it too late to change where #10362 is going? My real question is this: I 
+got an email saying my payment failed, but my card is fine and has funds. My colleague on the Free plan sees the same 
+thing. I raised TKT-4303 about something else last month.
+
+[Help with 2 things] true=technical pred=technical conf=0.58
+  For background, the item isn't what I needed. Most importantly: Scheduled reports takes well over a minute to load 
+since Monday.
+
+[Few things to sort out] true=shipping pred=shipping conf=0.76
+  What I actually need help with is this: I'd like to return #10022. Some context first: The overall experience lately 
+has been poor and I'm considering alternatives. The amount in question is $84.15.
+
+[Help with 2 things] true=general pred=general conf=0.65
+  My real question is this: Your docs reference an option in the export tool that doesn't exist in the current UI On a 
+related note, please update the delivery address on my open order - I've moved since ordering The amount in question 
+is $23.45.
+
+frame phrases: [('For background,', 94), ('Priority for me is:', 92), ('My real question is this:', 91), ('Separately, 
+and this is less urgent,', 85), ('The part I need you to action is:', 77), ('On a related note,', 74)]
+
+multi-issue rows where >=2 fragments were categorised by the single-issue lexicon: 0
+{}
+label among categories detected in the body: 12 / 13
+
+fragment-position vs label (per frame type):
+  Priority for me is:                      {'n': 92, 'issue_after_frame_known': 29, 'label==issue_after': 26}
+  My real question is this:                {'n': 91, 'issue_after_frame_known': 36, 'label==issue_after': 33}
+  For background,                          {'n': 94, 'issue_after_frame_known': 38, 'label==issue_after': 0}
+  Separately, and this is less urgent,     {'n': 85, 'issue_after_frame_known': 31, 'label==issue_after': 1}
+  The part I need you to action is:        {'n': 77, 'issue_after_frame_known': 32, 'label==issue_after': 28}
+  On a related note,                       {'n': 74, 'issue_after_frame_known': 29, 'label==issue_after': 1, 
+'issue_before_frame_known': 1, 'label==issue_before': 1}
+
+

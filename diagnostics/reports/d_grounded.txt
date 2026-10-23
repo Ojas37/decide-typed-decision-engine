@@ -1,0 +1,164 @@
+﻿
+base rate grounded=0.598 | at thr 0.50: errors 211 (3.25%)  FP(pred grounded, actually not)=131  FN(pred not grounded, 
+actually grounded)=80
+macro-F1 full coverage 0.9661 | majority-class trivial 0.3742
+deployed abstention (conf<0.953): abstains 17.0%; error among abstained 0.160 vs answered 0.0063; catches 83.9% of all 
+errors
+risk-coverage (conf=max(p,1-p)): [(0.7, 0.0046, 0.0), (0.8, 0.006, 0.0), (0.9, 0.0123, 0.0), (0.95, 0.0186, 0.0), 
+(1.0, 0.0325, 0.0325)]
+
+ERROR RATE BY MISMATCH TYPE
+  draft has numeral absent from KB                     n=2502  grounded-rate 0.413  model-error 0.0404  (FP 50, FN 51)
+  all draft numerals appear in KB                      n=3998  grounded-rate 0.714  model-error 0.0275  (FP 81, FN 29)
+  draft time-span absent from KB                       n=1422  grounded-rate 0.118  model-error 0.0352  (FP 19, FN 31)
+  draft time-spans all match KB                        n=4743  grounded-rate 0.742  model-error 0.0285  (FP 101, FN 34)
+  draft states no number at all                        n=   0  grounded-rate nan  model-error nan  (FP 0, FN 0)
+  any number/time mismatch                             n=2795  grounded-rate 0.390  model-error 0.0404  (FP 54, FN 59)
+  NO number/time mismatch                              n=3705  grounded-rate 0.755  model-error 0.0265  (FP 77, FN 21)
+
+Among rows with NO numeric mismatch: 3705 rows, ungrounded 907 (24.5%), model errors 98
+  draft-only words most diagnostic of UNgrounded here: [('users', '84/84'), ('sms', '15/15'), ('signed', '15/15'), 
+('renewal', '26/26'), ('prorated', '21/21'), ('plans', '31/31'), ('period', '17/17'), ('partner', '15/15'), ('orders', 
+'36/36'), ('no', '20/20'), ('next', '43/43'), ('minutes', '22/22'), ('first', '16/16'), ('few', '17/17')]
+
+FALSE POSITIVES (model says grounded, label says NOT)  n=131  (sorted by confidence)
+  p=0.998 | draft-only ['a', 'have', 'hour', 'i', 'is', 'it', 'lockout', 'note', 'of', 'quarter'] | kb-only(sample) 
+['60', 'accounts', 'and', 'are', 'automatically', 'available', 'clear', 'expire', 'in', 'links'] | dq-only [] kq-only 
+['5']
+         DRAFT: administrators reset through an SMS code, so that is what I have triggered. Use it within a quarter of 
+an hour - note lockout after five failed attempts.
+         KB   : Password resets are available to administrators via an SMS code. Links expire after 60 minutes. 
+Accounts lock automatically after five failed attempts and clear in 5 minutes minutes.
+  p=0.998 | draft-only ['60', 'and', 'happens', 'have', 'it', 'lockout', 'route', 'sent', 'that', 'to'] | 
+kb-only(sample) ['5', 'a', 'account', 'can', 'clearing', 'hour', 'link', 'locks', 'of', 'quarter'] | dq-only [] 
+kq-only ['5']
+         DRAFT: Reset sent via an SMS code. That route is for administrators; you have 60 minutes to use it, and 
+lockout happens after three failed attempts.
+         KB   : administrators can reset using an SMS code. A reset link is valid for a quarter of an hour. After 
+three failed attempts the account locks, clearing after 5 minutes minutes.
+  p=0.998 | draft-only ['300', '65', 'bought', 'carry', 'covered', 'directly', 'entitles', 'i', 'is', 'items'] | 
+kb-only(sample) ['100', '28', '80', 'about', 'all', 'are', 'ask', 'claims', 'complete', 'covers'] | dq-only ['93600'] 
+kq-only ['115200', '40320']
+         DRAFT: That is covered - items bought directly from us carry three hundred and sixty-five days from delivery, 
+which entitles you to a free replacement. I will need photographs o
+         KB   : The warranty covers all physical goods for one hundred and eighty days from delivery. Valid claims are 
+resolved with a free replacement. We ask for photographs of the fault. Repairs complete
+  p=0.998 | draft-only ['60', 'anything', 'have', 'i', 'inside', 'is', 'it', 'lockout', 'note', 'outstanding'] | 
+kb-only(sample) ['a', 'accounts', 'all', 'and', 'are', 'automatically', 'available', 'clear', 'expire', 'hour'] | 
+dq-only [] kq-only []
+         DRAFT: workspace owners reset through an email link, so that is what I have triggered. Use it within 60 
+minutes - note lockout after five failed attempts. We review anything out
+         KB   : Password resets are available to all users via an email link. Links expire after a quarter of an hour. 
+Accounts lock automatically after five failed attempts and clear in 10 minutes minutes.
+  p=0.998 | draft-only ['have', 'hour', 'i', 'it', 'lockout', 'note', 'of', 'quarter', 'so', 'that'] | kb-only(sample) 
+['5', '60', 'account', 'can', 'clearing', 'for', 'link', 'locks', 'minutes', 'the'] | dq-only [] kq-only ['5']
+         DRAFT: all users reset through an SMS code, so that is what I have triggered. Use it within a quarter of an 
+hour - note lockout after three failed attempts.
+         KB   : all users can reset using an SMS code. A reset link is valid for sixty minutes. After three failed 
+attempts the account locks, clearing after 5 minutes minutes.
+  p=0.998 | draft-only ['access', 'and', 'by', 'have', 'how', 'i', 'lasts', 'of', 'quarter', 'recover'] | 
+kb-only(sample) ['10', 'can', 'clearing', 'for', 'minutes', 'using', 'valid'] | dq-only [] kq-only ['10']
+         DRAFT: I have sent a reset by an SMS code, which is how all users recover access. The link lasts a quarter of 
+an hour, and the account locks after three failed attempts.
+         KB   : all users can reset using an SMS code. A reset link is valid for an hour. After three failed attempts 
+the account locks, clearing after 10 minutes minutes.
+  p=0.998 | draft-only ['actioned', 'are', 'at', 'beyond', 'capped', 'related', 'sandbox', 'that', 'within'] | 
+kb-only(sample) ['10', 'allows', 'burst', 'calls', 'capacity', 'exceeding', 'extra', 'for', 'is', 'measured'] | 
+dq-only [] kq-only []
+         DRAFT: sandbox keys are capped at 300 requests per minute over a rolling five minutes; beyond that the API 
+returns HTTP 429. Related requests are actioned within five requests p
+         KB   : The API allows three hundred requests per minute for Starter keys, measured over a rolling five 
+minutes. Exceeding this returns HTTP 429. Burst capacity is 10 requests per minute extra calls
+  p=0.998 | draft-only ['and', 'are', 'clear', 'covers', 'i', 'in', 'inside', 'it', 'put', 'returns'] | 
+kb-only(sample) ['a', 'back', 'by', 'charge', 'covered', 'customers', 'date', 'from', 'funds', 'go'] | dq-only [] 
+kq-only ['7200']
+         DRAFT: You are inside the 14 days window and this covers all plans, so I have put the refund through. It 
+returns to the original payment method and should clear in 3-5 business 
+         KB   : Customers covered by this policy - all paid plans - have fourteen days from the charge date to request 
+a refund. Review takes up to 5 days. Funds go back to the original payment method, usua
+
+FALSE NEGATIVES (model says NOT grounded, label says grounded)  n=80
+  p=0.002 | draft-only ['300', '4', '65', 'all', 'and', 'carry', 'covered', 'entitles', 'follow', 'goods'] | 
+kb-only(sample) ['28', 'about', 'ask', 'claims', 'complete', 'covers', 'every', 'for', 'in', 'repairs'] | dq-only 
+['93600'] kq-only ['525600']
+         DRAFT: That is covered - all physical goods carry three hundred and sixty-five days from delivery, which 
+entitles you to a full refund. I will need proof of purchase. Replacemen
+         KB   : The warranty covers every delivery for a year from delivery. Valid claims are resolved with a full 
+refund. We ask for proof of purchase. Repairs complete in about 28 days.
+  p=0.007 | draft-only ['15', 'have', 'i', 'is', 'it', 'lockout', 'note', 'reset', 'so', 'that'] | kb-only(sample) 
+['3', 'a', 'accounts', 'an', 'and', 'are', 'automatically', 'available', 'clear', 'expire'] | dq-only ['15'] kq-only 
+['3', '60']
+         DRAFT: all users reset through your recovery codes, so that is what I have triggered. Use it within 15 
+minutes - note lockout after ten failed attempts.
+         KB   : Password resets are available to all users via your recovery codes. Links expire after a quarter of an 
+hour. Accounts lock automatically after ten failed attempts and clear in 3 minutes minu
+  p=0.017 | draft-only ['365', 'all', 'arrange', 'goods', 'i', 'inside', 'physical', 'send', 'still', 'will'] | 
+kb-only(sample) ['14', '300', '65', 'about', 'ask', 'claims', 'complete', 'covers', 'delivery', 'every'] | dq-only 
+['525600'] kq-only ['20160', '93600']
+         DRAFT: You are still inside the 365 days warranty for all physical goods. Send photographs of the fault and I 
+will arrange a full refund.
+         KB   : The warranty covers every delivery for three hundred and sixty-five days from delivery. Valid claims 
+are resolved with a full refund. We ask for photographs of the fault. Repairs complete in
+  p=0.041 | draft-only ['anything', 'are', 'at', 'beyond', 'capped', 'open', 'picked', 'still', 'that', 'up'] | 
+kb-only(sample) ['allows', 'burst', 'calls', 'capacity', 'exceeding', 'extra', 'for', 'measured', 'this'] | dq-only [] 
+kq-only []
+         DRAFT: sandbox keys are capped at three hundred requests per minute over a fixed hourly window; beyond that 
+the API returns HTTP 429. Anything still open is picked up within 5 r
+         KB   : The API allows three hundred requests per minute for sandbox keys, measured over a fixed hourly 
+window. Exceeding this returns HTTP 429. Burst capacity is 5 requests per minute extra calls.
+  p=0.058 | draft-only ['1', 'above', 'anything', 'for', 'get', 'is', 'measured', 'open', 'picked', 'still'] | 
+kb-only(sample) ['1000', 'allowance', 'applies', 'are', 'burst', 'calls', 'counted', 'limited', 'of', 'receive'] | 
+dq-only [] kq-only []
+  p=0.060 | draft-only ['60', 'and', 'at', 'go', 'monthly', 'out', 'rate', 'starts'] | kb-only(sample) ['2', 'all', 
+'announced', 'apply', 'are', 'every', 'from', 'months', 'price', 'rates'] | dq-only [] kq-only ['2880']
+         DRAFT: Changes go out sixty days ahead to monthly subscribers by your account manager, and the new rate 
+starts at the following billing cycle.
+         KB   : Price changes are announced two months ahead to all subscribers by your account manager. New rates 
+apply from the following billing cycle. Rates are reviewed every 2 days months.
+  p=0.061 | draft-only ['above', 'anything', 'get', 'inside', 'limit', 'outstanding', 'review', 'starter', 'that', 
+'we'] | kb-only(sample) ['all', 'allows', 'api', 'burst', 'calls', 'capacity', 'exceeding', 'extra', 'returns', 
+'this'] | dq-only [] kq-only []
+         DRAFT: For Starter keys the limit is three hundred requests per minute, measured over a rolling minute. Above 
+that you will get a retry-after header. We review anything outstand
+         KB   : The API allows three hundred requests per minute for all API keys, measured over a rolling minute. 
+Exceeding this returns a retry-after header. Burst capacity is 20 requests per minute extra
+  p=0.061 | draft-only ['15', 'actioned', 'for', 'happens', 'have', 'is', 'it', 'lockout', 'owners', 'related'] | 
+kb-only(sample) ['a', 'accounts', 'administrators', 'automatically', 'available', 'clear', 'expire', 'hour', 'in', 
+'links'] | dq-only ['15'] kq-only ['60']
+         DRAFT: Reset sent via an SMS code. That route is for workspace owners; you have 15 minutes to use it, and 
+lockout happens after three failed attempts. Related requests are actio
+         KB   : Password resets are available to administrators via an SMS code. Links expire after a quarter of an 
+hour. Accounts lock automatically after three failed attempts and clear in 10 minutes minu
+
+CATEGORY COUNTS among all 211 errors:
+  {('FP', 'no number mismatch'): 77, ('FN', 'num/time mismatch'): 59, ('FN', 'no number mismatch'): 21, ('FP', 
+'num/time mismatch'): 54}
+
+FN rows with a numeric mismatch - mismatching items:
+   dn_only=['60'] dq_only=[] | kn=['5'] kq=['5', '60'] | draft: Reset sent via an SMS code. That route is for 
+workspace owners; you have sixty minutes to use it, and lockout 
+   dn_only=['60'] dq_only=[] | kn=['5'] kq=['5', '60'] | draft: Reset sent via your recovery codes. That route is for 
+all users; you have 60 minutes to use it, and lockout ha
+   dn_only=[] dq_only=['525600'] | kn=['1', '14', '300', '65'] kq=['20160', '93600'] | draft: You are still inside the 
+a year warranty for every delivery. Send proof of purchase and I will arrange a free 
+   dn_only=['15'] dq_only=['15'] | kn=['3', '5'] kq=['3', '60'] | draft: I have sent a reset by an SMS code, which is 
+how all users recover access. The link lasts 15 minutes, and the 
+   dn_only=[] dq_only=['525600'] | kn=['28', '300', '65'] kq=['40320', '93600'] | draft: You are still inside the a 
+year warranty for every delivery. Send proof of purchase and I will arrange a repai
+   dn_only=['60'] dq_only=[] | kn=['2', '5'] kq=['7200', '86400'] | draft: all subscribers get sixty days notice by 
+email. The new price applies from the first of the next month.
+   dn_only=['60'] dq_only=[] | kn=['2'] kq=['2880', '86400'] | draft: We tell monthly subscribers 60 days before any 
+change, through email. It takes effect from the next renewal.
+   dn_only=['30'] dq_only=[] | kn=['2', '24'] kq=['1440', '2880', '43200'] | draft: Queued. administrators get exports 
+in CSV only; the link is valid 30 days and it takes up to 24 hours to build
+   dn_only=['30'] dq_only=[] | kn=['2'] kq=['2880', '43200'] | draft: We tell all subscribers thirty days before any 
+change, through your account manager. It takes effect from the 
+   dn_only=['1'] dq_only=[] | kn=['10', '1000'] kq=[] | draft: For all API keys the limit is one thousand requests per 
+minute, measured over a rolling minute. Above that you
+
+Vocabulary the normaliser does not understand (words next to numerals in FN/FP rows):
+  [('days', 111), ('minutes', 59), ('failed', 50), ('requests', 49), ('and', 16), ('weeks', 13), ('hours', 13), 
+('business', 11), ('thousand', 9), ('months', 6), ('7', 4), ('5', 3), ('related', 1), ('replacements', 1), 
+('anything', 1)]
+
+
