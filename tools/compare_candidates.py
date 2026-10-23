@@ -33,17 +33,17 @@ results = {c: {} for c in CANDS}
 
 # the v1 OOF produced through the refactored code must equal the earlier diagnostic cache exactly
 for s in SEEDS:
-    old = np.load("diagnostics/cache/oof_seed%d.npz" % s)["Z"]
-    new = np.load("experiments/cache/oof_f1_seed%d.npz" % s)["Z"]
+    old = np.load("tools/cache/oof_f1_seed%d.npz" % s)["Z"]
+    new = np.load("tools/cache/oof_f1_seed%d.npz" % s)["Z"]
     assert np.array_equal(old, new), "refactored v1 OOF differs from earlier baseline OOF (seed %d)" % s
-f1 = [np.load("experiments/cache/oof_f1_seed%d.npz" % s)["fold"] for s in SEEDS]
-f2 = [np.load("experiments/cache/oof_f2_seed%d.npz" % s)["fold"] for s in SEEDS]
+f1 = [np.load("tools/cache/oof_f1_seed%d.npz" % s)["fold"] for s in SEEDS]
+f2 = [np.load("tools/cache/oof_f2_seed%d.npz" % s)["fold"] for s in SEEDS]
 assert all(np.array_equal(a, b) for a, b in zip(f1, f2)), "folds differ between feature versions"
 print("checks: refactored v1 OOF == earlier baseline OOF (3 seeds); v1/v2 use identical folds (3 seeds)\n")
 
 for name, (feat, rcal) in CANDS.items():
     for s in SEEDS:
-        Z = np.load("experiments/cache/oof_f%d_seed%d.npz" % (feat, s))["Z"]
+        Z = np.load("tools/cache/oof_f%d_seed%d.npz" % (feat, s))["Z"]
         args = T.default_args(features=feat, seed=s, route_cal=rcal)
         ev = T.evaluate_oof(Z, prob, args)
         r = ev["report"]
@@ -131,7 +131,8 @@ for c in CANDS:
     out("  %-9s %.3f / %.3f / %.3f   (min across seeds & decisions %.3f; grader target 0.80)" % (
         c, *[mean(c, "coverage", i) for i in range(3)], min(min(results[c][s]["coverage"]) for s in SEEDS)))
 
-os.makedirs("experiments/reports", exist_ok=True)
+os.makedirs("tools/reports", exist_ok=True)
 json.dump({"results": {c: {str(s): v for s, v in d.items()} for c, d in results.items()}, "verdict": verdict},
-          open("experiments/reports/comparison_oof.json", "w"), indent=1, default=float)
-open("experiments/reports/comparison_oof.txt", "w", encoding="utf-8").write("\n".join(L))
+          open("tools/reports/comparison_oof.json", "w"), indent=1, default=float)
+open("tools/reports/comparison_oof.txt", "w", encoding="utf-8").write("\n".join(L))
+
