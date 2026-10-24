@@ -61,11 +61,11 @@
 - **Mean ECE:** **0.0129**
 - **Brier Skill Score:** **0.7928**
 - **Latency (Client p95):**
-  - `route`: 2.64 ms
-  - `approve`: 2.60 ms
-  - `grounded`: 2.57 ms
-  - **Mean p95:** **2.61 ms** (Well below the 25.0 ms ceiling for full marks; ~38x faster than the 100 ms gate)
-- **Model-Only Latency (Excluding HTTP):** p95 ~0.89 ms
+  - `route`: 1.01 ms
+  - `approve`: 1.02 ms
+  - `grounded`: 1.01 ms
+  - **Mean p95:** **1.01 ms** (Well below the 25.0 ms ceiling for full marks; ~100x faster than the 100 ms gate)
+- **Model-Only Latency (Excluding HTTP):** p95 ~0.48 ms
 
 ---
 
