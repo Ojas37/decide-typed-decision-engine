@@ -1,130 +1,254 @@
-# Decide — starter repo
+# Decide — Typed Decision Engine
 
-A working, schema-valid endpoint that scores almost nothing. Your job is to make
-it good.
-
-Everything here exists so that you never lose time to HTTP plumbing, JSON shapes
-or measurement. None of it does any of the thinking for you.
+One model. Three typed decisions. Calibrated probabilities. Sub-2ms p95 on CPU.
 
 ---
 
-## Quick start
+## Start the service (single command, clean 4-core Linux machine)
 
 ```bash
-pip install -r requirements.txt
-uvicorn app:app --host 0.0.0.0 --port 8000
+pip install -r requirements.txt && uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
-In a second terminal:
+Artifacts (`artifacts/weights.npz`, `artifacts/vocab.json`, `artifacts/meta.json`)
+are committed to the repo — no download step needed. The service is ready to
+accept requests as soon as uvicorn finishes loading.
+
+Verify it is alive:
 
 ```bash
-python selfcheck.py --url http://localhost:8000/v1/decide --limit 200
+curl http://localhost:8000/health
+# {"status":"ok","loaded":true}
 ```
 
-That should run clean and give you a very low score. You now have a valid
-submission. Everything from here is improvement, not integration.
+Run the full benchmark against the dev split:
 
-Put `train.jsonl` and `dev.jsonl` in `data/`.
-
-## The only file you change
-
-**`model.py`.** It holds one class with three methods:
-
-```python
-route(state)     -> (value, probs, confidence, abstain)
-approve(state)   -> (value, p_true, abstain)
-grounded(state)  -> (value, p_true, abstain)
+```bash
+python selfcheck.py --url http://localhost:8000/v1/decide
 ```
 
-Keep those signatures and return shapes and the rest of the repo keeps working.
+---
 
-`app.py` is the HTTP layer and implements the required contract exactly. You
-should not need to touch it. If you find yourself changing the response shape,
-stop — automated judging will reject it.
+## Where the sharing happens
 
-`selfcheck.py` is the same scoring code the judges run, pointed at your dev
-split. There is no hidden extra criterion.
+> The problem statement requires this section. Here it is.
 
-## What you have to decide
+Every request — regardless of whether it asks for `route`, `approve`, or
+`grounded` — is processed by **one shared forward pass** through one shared
+set of weights. Nothing is routed to a separate model.
 
-All of it. The model, the features, how the three decision types share a
-backbone, how you train, how you turn scores into probabilities you can defend,
-and when to abstain. That is the exercise, and the scoring rubric is the only
-guidance you get.
+**In `model.py`:**
 
-Four things worth knowing before you pick an approach:
+```
+Featurizer.encode(state)
+    → (sparse token indices, dense float32 vector)
+        ↓
+forward_logits(W, idx, dense)          # one call, one set of weights
+    │
+    ├─ EmbeddingBag lookup + sum-pool  → pooled (128-d)   ← shared
+    ├─ concat(pooled, dense)
+    ├─ Linear W1 (→256) + ReLU        ← shared trunk layer 1
+    ├─ Linear W2 (→128) + ReLU        ← shared trunk layer 2
+    │
+    ├─ route head:    Linear Wr1 (→64) + ReLU + Linear Wr2 (→5)
+    ├─ approve head:  Linear Wa1 (→64) + ReLU + Linear Wa2 (→1)
+    └─ grounded head: Linear Wg1 (→64) + ReLU + Linear Wg2 (→1)
+```
 
-- **A simple baseline is harder to beat than you expect.** Build one first. It
-  takes twenty minutes and tells you how hard the problem actually is.
-- **The three questions are not all the same shape.** Think about what each one
-  is comparing before you commit to an architecture.
-- **Raw model confidence is usually overconfident.** Accuracy and calibration
-  are separate problems with separate fixes. `selfcheck.py` reports ECE.
-- **Look at the trivial-policy lines in the report.** For at least one decision,
-  doing nothing at all is a respectable strategy, and your threshold probably
-  should not be 0.5.
+`forward_logits` returns all three outputs in a single pass. `DecisionModel`
+caches that result, so `route(state)`, `approve(state)`, `grounded(state)` on
+the same state each read the cached trunk output — the trunk runs exactly once.
 
-## Gates
+The trunk weights (`emb`, `W1`, `b1`, `W2`, `b2`) are trained jointly on all
+three labels simultaneously. Each head adds one private two-layer block
+(`64-d hidden + output`). Adding a fourth decision type means adding one more
+such block and one column to the training loop — the trunk and vocabulary do not
+change.
 
-| | By | What |
+---
+
+## Pretrained components and licences
+
+No external pretrained model is used. The embedding table and all weights are
+trained from scratch on the provided `train.jsonl` dataset.
+
+Libraries used at inference:
+
+| Library | Version | Licence |
 |---|---|---|
-| Gate 1 | T+2:00 | A simple baseline submitted and scored |
-| Gate 2 | T+5:30 | A live endpoint conforming to the schema, serving *something* |
+| NumPy | ≥ 1.26 | BSD 3-Clause |
+| FastAPI | ≥ 0.115 | MIT |
+| uvicorn | ≥ 0.32 | BSD 3-Clause |
 
-Gate 2 is why the stub exists. Get a service running early even if the model
-inside it is useless, then improve the model. Teams that stay in a notebook
-until hour nine do not finish.
+Libraries used at training only (not needed to serve):
 
-## Hard constraints
-
-- **CPU only at inference.** Train on GPU if you like; serve on CPU.
-- **No network calls while serving.** No LLM API, no hosted embeddings, nothing
-  external in the request path.
-- **p95 under 100ms per call**, measured by the judges on a 4-core machine.
-  Full marks at 25ms.
-- **One shared model across all three decision types**, not three separate
-  models behind a router. Your README must say where the sharing happens.
-- **Artifacts under 500MB total.**
-- Pretrained open-weight models published before the event are fine. Name each
-  one and its licence in your README.
-
-## Reading your self-check
-
-| Axis | Weight | What it is |
+| Library | Version | Licence |
 |---|---|---|
-| quality | 40% | How often you are right, scored against the best trivial policy for each decision |
-| calibration | 25% | Whether your probabilities mean what they say (ECE, Brier) |
-| latency | 20% | p95 per call. Full marks at 25ms, zero at the 100ms gate |
-| abstention | 15% | Whether your confidence ranks your own errors, at 80% coverage |
+| PyTorch | ≥ 2.1 | BSD-style (Meta) |
+| scikit-learn | ≥ 1.3 | BSD 3-Clause |
 
-Your latency numbers depend on your machine. The judges re-measure on theirs, so
-treat yours as a guide. Measure one request at a time — batching many requests
-and dividing is not latency and will not be accepted.
+---
 
-## Submitting
+## Benchmark results (dev split — 1,500 records × 3 decisions)
 
-- Public Git repo: code, `README.md`, `model_card.md`, `results.json`
-- A **single command** in your README that starts the service on a clean 4-core
-  Linux box. If the judges cannot start it, it cannot be scored.
-- The host and port where your service is running at the deadline
-- `results.json` — produced by `python selfcheck.py --url ...`
-- `model_card.md` — one page: what you built, what you trained on, your measured
-  accuracy and calibration, where it fails, and when it abstains. **Submissions
-  without a model card are not ranked.**
+Results file: `results.json` (produced by `selfcheck.py`).
 
-If your weights are not in the repo, your README must say how to produce or
-fetch them. A service the judges cannot start scores zero.
+| Axis | Score | Weight | Contribution |
+|---|---|---|---|
+| Quality | 0.8316 | 40% | 33.26 |
+| Calibration | 0.8641 | 25% | 21.60 |
+| Latency | 1.0000 | 20% | 20.00 |
+| Abstention | 0.5106 | 15% | 7.66 |
+| **Total** | | | **82.53 / 100** |
 
-## Practical
+Per-decision latency (client p95, one request at a time, warm):
 
-- **Commit and push every thirty minutes.** Free Lightning Studios restart every
-  four hours. That will happen to you twice. Anything unpushed is gone.
-- **Pre-download any pretrained weights** before the clock starts.
-- Mentors will help with environment, tooling and debugging. They will not tell
-  you what architecture to use or why a decision is scoring badly.
+| Decision | p50 (ms) | p95 (ms) |
+|---|---|---|
+| route | 0.82 | 1.01 |
+| approve | 0.81 | 1.02 |
+| grounded | 0.81 | 1.01 |
+| **mean p95** | | **1.01 ms** |
 
-## What is deliberately not in here
+Hard gate: 100 ms. Full-marks threshold: 25 ms. Measured mean p95: **1.01 ms**.
 
-No model, no features, no training script, no calibration, no abstention policy,
-no serving or threading configuration. Those are the parts being assessed. If
-something feels missing, it is probably the thing you are supposed to build.
+Schema: 4,500 / 4,500 valid. Artifact size: 4.45 MB (limit: 500 MB).
+
+---
+
+## Architecture overview
+
+```
+state dict  →  Featurizer  →  (sparse token ids, dense float32 vector [104-d])
+                                    ↓
+                            Shared trunk (NumPy)
+                        EmbeddingBag sum-pool (128-d)
+                        concat dense
+                        Linear(384→256) + ReLU        [W1, b1]
+                        Linear(256→128) + ReLU        [W2, b2]
+                                    ↓
+            ┌───────────────────────┼──────────────────────┐
+            ▼                       ▼                       ▼
+    route head               approve head            grounded head
+ Linear(128→64)+ReLU     Linear(128→64)+ReLU     Linear(128→64)+ReLU
+ Linear(64→5)  softmax   Linear(64→1)  sigmoid   Linear(64→1)  sigmoid
+ OvR isotonic calibr.    Platt scaling           Isotonic calibr.
+ argmax → queue label    τ = 0.73 (3:1 cost)     τ = 0.50
+```
+
+Inference is pure NumPy — no PyTorch, no ONNX runtime, no compilation step.
+Weights are loaded from `artifacts/weights.npz` at startup.
+
+---
+
+## The three decisions
+
+**`route`** — one of five queues: `billing`, `technical`, `account`, `shipping`,
+`general`. Returns a full probability distribution. Calibrated with one-vs-rest
+isotonic regression; the model abstains when `max(probs) < 0.52`.
+
+**`approve`** — yes/no auto-approval. Wrongly approving costs 3× wrongly
+holding, so the decision threshold is 0.73, not 0.5. Returns `p_true` — the
+calibrated probability that approval is safe. Abstains when the model's
+confidence is below 0.79 (too close to the asymmetric break-even to act).
+
+**`grounded`** — yes/no: is the draft reply supported by the KB article?
+Driven by token-overlap, bigram-overlap, and quantity-agreement features between
+`draft_reply` and `kb_article`. The easiest of the three (dev F1 0.994). Sets a
+high abstention bar at 0.95 confidence — grounding errors are high-stakes.
+
+---
+
+## Training the model yourself
+
+Training requires PyTorch and scikit-learn (`requirements-train.txt`).
+
+```bash
+pip install -r requirements-train.txt
+
+# Place train.jsonl in data/ first, then:
+python train.py \
+    --train data/train.jsonl \
+    --out   artifacts \
+    --seed  13 \
+    --route_cal ovr_isotonic
+```
+
+Full set of options used to produce the committed artifacts:
+
+```bash
+python train.py \
+    --train data/train.jsonl --out artifacts --seed 13 \
+    --folds 5 --epochs 20 --batch 128 --lr 0.0005 --wd 0.1 \
+    --emb_dim 128 --hidden 256 --hidden2 128 --head_hidden 64 \
+    --dropout 0.2 --token_dropout 0.3 --min_df 3 \
+    --coverage 0.83 --route_cal ovr_isotonic
+```
+
+Training on CPU takes roughly 8–12 minutes for 20 epochs on 6,500 examples.
+GPU is faster but not required. The script writes `weights.npz`, `vocab.json`,
+`meta.json`, and `training_report.json` into `--out` and verifies that NumPy
+inference matches PyTorch logits before exiting.
+
+---
+
+## Repo layout
+
+```
+app.py              HTTP layer (do not modify — schema is fixed)
+model.py            Featurizer, forward pass, calibration, DecisionModel
+train.py            Full training pipeline: featurize → OOF → calibrate → export
+selfcheck.py        Scoring code (identical to what the judges run)
+smoke_test.py       Offline contract + latency check (no service needed)
+requirements.txt    Inference dependencies only (NumPy, FastAPI, uvicorn)
+requirements-train.txt  Adds PyTorch and scikit-learn for training
+artifacts/
+    weights.npz     Trained weights (~4.1 MB)
+    vocab.json      Token vocabulary (~200 KB)
+    meta.json       Calibration parameters, decision thresholds, provenance
+data/               Place train.jsonl and dev.jsonl here (gitignored)
+tools/              Optional analysis scripts (not needed to serve or judge)
+```
+
+---
+
+## Endpoint
+
+```
+POST /v1/decide
+GET  /health
+```
+
+Request:
+
+```json
+{
+  "request_id": "abc-123",
+  "decision": "route",
+  "state": {
+    "subject": "...", "body": "...", "customer_tier": "pro",
+    "amount": 49.99, "draft_reply": "...", "kb_article": "..."
+  }
+}
+```
+
+Route response:
+
+```json
+{
+  "request_id": "abc-123", "decision": "route", "type": "choice",
+  "value": "billing",
+  "probs": {"billing": 0.82, "technical": 0.09, "account": 0.06,
+            "shipping": 0.02, "general": 0.01},
+  "confidence": 0.82, "abstain": false, "latency_ms": 0.9
+}
+```
+
+Binary response (approve / grounded):
+
+```json
+{
+  "request_id": "abc-123", "decision": "approve", "type": "binary",
+  "value": false, "p_true": 0.13, "abstain": false, "latency_ms": 0.8
+}
+```
