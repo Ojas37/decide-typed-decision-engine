@@ -46,7 +46,7 @@ logger = logging.getLogger("decide.model")
 FP_COST = 3.0                 # wrongly approving costs 3x wrongly holding
 P_EPS = 0.002                 # probabilities are kept inside [P_EPS, 1-P_EPS]
 FEATURE_VERSION = 1                       # default for new training runs; artifacts carry their own
-SUPPORTED_FEATURE_VERSIONS = (1, 2)
+SUPPORTED_FEATURE_VERSIONS = (1, 2, 3)
 ARTIFACT_FORMAT = 1
 TIERS = ["free", "pro", "enterprise"]
 AMOUNT_EDGES = [0.001, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 125, 150,
@@ -60,6 +60,7 @@ HAT_KNOTS = np.linspace(0.0, 1.3, 27)
 HAT_WIDTH = 0.05
 N_HATS = len(HAT_KNOTS)
 V2_DIM = len(TIERS) * N_HATS + len(TIERS) * 3 + 3
+V3_DIM = 3   # marker_count, tier_cap_ratio, beyond_cap_flag
 
 
 # ---------------------------------------------------------------------------
@@ -191,14 +192,14 @@ class Featurizer:
                  tier_caps: Optional[Dict[str, float]] = None) -> None:
         if version not in SUPPORTED_FEATURE_VERSIONS:
             raise ValueError("unsupported feature version %r" % version)
-        if version == 2 and not tier_caps:
+        if version >= 2 and not tier_caps:
             raise ValueError("feature version 2 needs tier_caps")
         self.vocab = vocab
         self.version = version
         self.tier_caps = tier_caps
 
     @staticmethod
-    def extract(state: Dict[str, Any]) -> Tuple[List[str], np.ndarray]:
+    def extract(state: Dict[str, Any], version: int = 1) -> Tuple[List[str], np.ndarray]:
         subject = _as_str(state.get("subject"))
         body = _as_str(state.get("body"))
         tier = _as_str(state.get("customer_tier")).strip().lower()
@@ -273,13 +274,18 @@ class Featurizer:
         dense = np.asarray(
             tier_oh + [math.log1p(amount) / 8.0, 1.0 if amount == 0.0 else 0.0]
             + bin_oh + cross + pair, dtype=np.float32)
+        if version >= 3:
+            toks |= _v3_sparse_tokens(state)
         return sorted(toks), dense
 
     def encode(self, state: Dict[str, Any]) -> Tuple[np.ndarray, np.ndarray]:
-        toks, dense = self.extract(state)
-        if self.version == 2:
+        toks, dense = self.extract(state, self.version)
+        if self.version >= 2:
             tier = _as_str(state.get("customer_tier")).strip().lower()
             block = amount_block_v2([_as_amount(state.get("amount"))], [tier], self.tier_caps)[0]
+            dense = np.concatenate([dense, block])
+        if self.version >= 3:
+            block = v3_dense_block([state], self.tier_caps)[0]
             dense = np.concatenate([dense, block])
         vocab = self.vocab or {}
         idx = np.fromiter((vocab[t] for t in toks if t in vocab), dtype=np.int64)
@@ -290,7 +296,12 @@ DENSE_DIM = int(Featurizer.extract({})[1].shape[0])          # version-1 dense w
 
 
 def dense_dim(version: int) -> int:
-    return DENSE_DIM + (V2_DIM if version == 2 else 0)
+    n = DENSE_DIM
+    if version >= 2:
+        n += V2_DIM
+    if version >= 3:
+        n += V3_DIM
+    return n
 
 
 def amount_block_v2(amounts: Sequence[float], tiers: Sequence[str],
@@ -319,6 +330,59 @@ def amount_block_v2(amounts: Sequence[float], tiers: Sequence[str],
         out[m, base + j * 3: base + j * 3 + 3] = lin[m]
     out[:, base + len(TIERS) * 3:] = lin
     return out
+
+
+_V3_MARKERS = (
+    ("priority for me is", "mk:priority"),
+    ("most importantly", "mk:priority"),
+    ("my real question is", "mk:question"),
+    ("what i actually need", "mk:question"),
+    ("part i need you to action", "mk:action"),
+    ("less important, but", "mk:secondary"),
+    ("separately", "mk:secondary"),
+    ("on a related note", "mk:secondary"),
+    ("also worth mentioning", "mk:secondary"),
+    ("some context first", "mk:context"),
+    ("for background", "mk:context"),
+)
+_V3_ACTIONS = ("cancel", "refund", "delete", "close account", "downgrade", "escalate")
+
+
+def _v3_sparse_tokens(state: Dict[str, Any]) -> set:
+    subject = _as_str(state.get("subject")).lower()
+    body = _as_str(state.get("body")).lower()
+    out = set()
+    for phrase, token in _V3_MARKERS:
+        if phrase in body:
+            out.add(token)
+    for action in _V3_ACTIONS:
+        if action in body:
+            out.add("act:" + action.replace(" ", "_"))
+    subj_money = bool(_MONEY_RE.search(subject))
+    body_money = bool(_MONEY_RE.search(body))
+    if subj_money != body_money:
+        out.add("sb:money_disagree")
+    subj_action = any(a in subject for a in _V3_ACTIONS)
+    body_action = any(a in body for a in _V3_ACTIONS)
+    if subj_action != body_action:
+        out.add("sb:action_disagree")
+    return out
+
+
+def v3_dense_block(states: Sequence[Dict[str, Any]],
+                   tier_caps: Dict[str, float]) -> np.ndarray:
+    """(len(states), 3): marker_count, tier_cap_ratio, beyond_cap_flag."""
+    rows = np.zeros((len(states), V3_DIM), dtype=np.float32)
+    for i, s in enumerate(states):
+        body = _as_str(s.get("body")).lower()
+        count = sum(1 for phrase, _ in _V3_MARKERS if phrase in body)
+        rows[i, 0] = min(count, 3) / 3.0
+        tier = _as_str(s.get("customer_tier")).strip().lower()
+        cap = float(tier_caps.get(tier, 1.0)) if tier_caps else 1.0
+        r = min(_as_amount(s.get("amount")) / max(cap, 1e-6), 2.0)
+        rows[i, 1] = r
+        rows[i, 2] = 1.0 if r > 1.0 else 0.0
+    return rows
 
 
 # ---------------------------------------------------------------------------
